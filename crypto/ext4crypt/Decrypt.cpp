@@ -175,7 +175,7 @@ bool Decrypt_DE() {
 
 #ifdef HAVE_SYNTH_PWD_SUPPORT
 // Crappy functions for debugging, please ignore unless you need to debug
-/*void output_hex(const std::string& in) {
+*void output_hex(const std::string& in) {
 	const char *buf = in.data();
 	char hex[in.size() * 2 + 1];
 	unsigned int index;
@@ -207,7 +207,7 @@ void output_hex(std::vector<uint8_t>* vec) {
 		sprintf(&hex[0], "%02X", vec->at(index));
 		printf("%s", hex);
 	}
-}*/
+}
 
 /* An alternative is to use:
  * sqlite3 /data/system/locksettings.db "SELECT value FROM locksettings WHERE name='sp-handle' AND user=0;"
@@ -949,7 +949,7 @@ bool Get_Secdis(const std::string& spblob_path, const std::string& handle_str, s
 		printf("Failed to read '%s'\n", secdis_file.c_str());
 		return false;
 	}
-	//output_hex(secdis_data.data(), secdis_data.size());printf("\n");
+	printf("get secdis: "); output_hex(secdis_data.data(), secdis_data.size());printf("\n");
 	return true;
 }
 
@@ -1014,15 +1014,15 @@ bool Decrypt_User_Synth_Pass(const userid_t user_id, const std::string& Password
 		printf("Failed to Get_Password_Data\n");
 		return Free_Return(retval, weaver_key, &pwd);
 	}
-	//printf("pwd N %i R %i P %i salt ", pwd.scryptN, pwd.scryptR, pwd.scryptP); output_hex((char*)pwd.salt, pwd.salt_len); printf("\n");
+	printf("pwd N %i R %i P %i salt ", pwd.scryptN, pwd.scryptR, pwd.scryptP); output_hex((char*)pwd.salt, pwd.salt_len); printf("\n");
 	unsigned char password_token[PASSWORD_TOKEN_SIZE];
-	//printf("Password: '%s'\n", Password.c_str());
+	printf("Password: '%s'\n", Password.c_str());
 	// The password token is the password scrypted with the parameters from the password data file
 	if (!Get_Password_Token(&pwd, Password, &password_token[0])) {
 		printf("Failed to Get_Password_Token\n");
 		return Free_Return(retval, weaver_key, &pwd);
 	}
-	//output_hex(&password_token[0], PASSWORD_TOKEN_SIZE);printf("\n");
+	output_hex(&password_token[0], PASSWORD_TOKEN_SIZE);printf("\n");
 	if (Is_Weaver(spblob_path, handle_str)) {
 		printf("using weaver\n");
 		// BEGIN PIXEL 2 WEAVER
@@ -1088,8 +1088,11 @@ bool Decrypt_User_Synth_Pass(const userid_t user_id, const std::string& Password
 			printf("malloc error getting secdiscardable\n");
 			return Free_Return(retval, weaver_key, &pwd);
 		}
+		printf("void secdiscardable\n");
+
 		memcpy((void*)&application_id[0], (void*)&password_token[0], PASSWORD_TOKEN_SIZE);
 		memcpy((void*)&application_id[PASSWORD_TOKEN_SIZE], secdiscardable, SHA512_DIGEST_LENGTH);
+		printf("application ID: "); output_hex((unsigned char*)application_id, PASSWORD_TOKEN_SIZE + SHA512_DIGEST_LENGTH); printf("\n");
 
 		int ret = -1;
 		bool request_reenroll = false;
